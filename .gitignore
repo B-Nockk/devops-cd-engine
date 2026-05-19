@@ -1,2 +1,18 @@
 IGNORE
 *.ignore*
+
+# Binaries
+/bin/
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
+data.db
+
+# Go workspaces
+go.work
+go.work.sum
+
+# OS files
+.DS_Store

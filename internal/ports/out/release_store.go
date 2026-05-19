@@ -18,7 +18,7 @@ type ReleaseStore interface {
 		status domain.ReleaseStatus,
 	) error
 
-	Get(
+	GetRelease(
 		ctx context.Context,
 		id domain.ID,
 	) (domain.Release, error)

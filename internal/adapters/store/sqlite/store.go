@@ -3,7 +3,9 @@ package sqlite
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
+	"time"
 
 	_ "modernc.org/sqlite" // CGO-free SQLite driver
 
@@ -86,16 +88,30 @@ func (s *Store) Get(
 }
 
 // --- EnvironmentStore ---
-func (s *Store) GetEnvironment(
-	ctx context.Context,
-	id domain.ID,
-) (domain.Environment, error) {
+func (s *Store) GetEnvironment(ctx context.Context, id domain.ID) (domain.Environment, error) {
 	var e domain.Environment
+	// Use []byte to safely extract strings/json from SQLite
+	var hcJSON, rpJSON, metaJSON []byte
+
 	row := s.db.QueryRowContext(ctx,
 		`SELECT id, tenant_id, name, strategy, healthcheck, rollback_policy, metadata FROM environments WHERE id = ?`,
 		string(id))
-	err := row.Scan(&e.ID, &e.TenantID, &e.Name, &e.Strategy, &e.HealthCheck, &e.RollbackPolicy, &e.MetaData)
-	return e, err
+
+	// Scan into the temporary byte slices
+	err := row.Scan(&e.ID, &e.TenantID, &e.Name, &e.Strategy, &hcJSON, &rpJSON, &metaJSON)
+	if err != nil {
+		return e, err
+	}
+
+	// Safely unmarshal the JSON strings into the Domain Structs
+	if len(hcJSON) > 0 {
+		_ = json.Unmarshal(hcJSON, &e.HealthCheck)
+	}
+	if len(rpJSON) > 0 {
+		_ = json.Unmarshal(rpJSON, &e.RollbackPolicy)
+	}
+
+	return e, nil
 }
 
 // --- ReleaseStore ---
@@ -135,11 +151,14 @@ func (s *Store) UpdateStatus(
 	return err
 }
 
-func (s *Store) GetRelease(
-	ctx context.Context,
-	id domain.ID,
-) (domain.Release, error) {
+func (s *Store) GetRelease(ctx context.Context, id domain.ID) (domain.Release, error) {
 	var r domain.Release
+
+	// Temporary variables for complex types and nullables
+	var initJSON, metaJSON []byte
+	var startedAtStr string
+	var completedAtStr sql.NullString // Protects against NULL in the database
+
 	row := s.db.QueryRowContext(
 		ctx,
 		`SELECT id, environment_id, artifact,
@@ -153,15 +172,36 @@ func (s *Store) GetRelease(
 		&r.EnvironmentID,
 		&r.Artifact,
 		&r.GitTag,
-		&r.InitiatedBy,
+		&initJSON, // Scan into byte slice
 		&r.Status,
 		&r.StrategyUsed,
-		&r.StartedAt,
-		&r.CompletedAt,
+		&startedAtStr,   // Scan into string
+		&completedAtStr, // Scan into NullString
 		&r.ReleaseNotes,
-		&r.MetaData,
+		&metaJSON, // Scan into byte slice
 	)
-	return r, err
+	if err != nil {
+		return r, err
+	}
+
+	// Safely unmarshal JSON into Domain Structs
+	if len(initJSON) > 0 {
+		_ = json.Unmarshal(initJSON, &r.InitiatedBy)
+	}
+	if len(metaJSON) > 0 {
+		_ = json.Unmarshal(metaJSON, &r.MetaData)
+	}
+
+	// Parse timestamps
+	if startedAtStr != "" {
+		r.StartedAt, _ = time.Parse(time.RFC3339, startedAtStr)
+	}
+	if completedAtStr.Valid && completedAtStr.String != "" {
+		t, _ := time.Parse(time.RFC3339, completedAtStr.String)
+		r.CompletedAt = &t
+	}
+
+	return r, nil
 }
 
 // --- DeploymentStore ---
@@ -200,4 +240,16 @@ func (s *Store) UpdateStatusDeployment(
 		string(id),
 	)
 	return err
+}
+
+// List returns all tenants (Stubbed for interface compliance)
+func (s *Store) ListTenants(ctx context.Context) ([]domain.Tenant, error) {
+	// TODO: Implement full SELECT query when building the HTTP API
+	return []domain.Tenant{}, nil
+}
+
+// ListEnvironments returns all environments for a tenant (Stubbed for interface compliance)
+func (s *Store) ListEnvironments(ctx context.Context, tenantID domain.ID) ([]domain.Environment, error) {
+	// TODO: Implement full SELECT query when building the HTTP API
+	return []domain.Environment{}, nil
 }

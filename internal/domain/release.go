@@ -9,11 +9,11 @@ import (
 type ReleaseStatus string
 
 const (
-	ReleasePending    ReleaseStatus = "pending"
-	ReleaseInProgress ReleaseStatus = "in_progress"
-	ReleaseHealthy    ReleaseStatus = "healthy"
-	ReleaseFailed     ReleaseStatus = "failed"
-	ReleaseRolledBack ReleaseStatus = "rolled_back"
+	ReleaseStatusPending    ReleaseStatus = "pending"
+	ReleaseStatusInProgress ReleaseStatus = "in_progress"
+	ReleaseStatusHealthy    ReleaseStatus = "healthy"
+	ReleaseStatusFailed     ReleaseStatus = "failed"
+	ReleaseStatusRolledBack ReleaseStatus = "rolled_back"
 )
 
 type Release struct {
@@ -52,7 +52,7 @@ func NewRelease(
 		Artifact:      artifact,
 		GitTag:        gitTag,
 		InitiatedBy:   initiator,
-		Status:        ReleasePending,
+		Status:        ReleaseStatusPending,
 		StrategyUsed:  strategy,
 		StartedAt:     time.Now(),
 		ReleaseNotes:  releaseNotes,
