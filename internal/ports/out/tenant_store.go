@@ -12,5 +12,5 @@ type TenantStore interface {
 		id domain.ID,
 	) (domain.Tenant, error)
 
-	List(ctx context.Context) ([]domain.Tenant, error)
+	ListTenants(ctx context.Context) ([]domain.Tenant, error)
 }

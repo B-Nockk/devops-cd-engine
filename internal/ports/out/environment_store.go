@@ -12,7 +12,7 @@ type EnvironmentStore interface {
 		id domain.ID,
 	) (domain.Environment, error)
 
-	List(
+	ListEnvironments(
 		ctx context.Context,
 		tenantID domain.ID,
 	) ([]domain.Environment, error)
