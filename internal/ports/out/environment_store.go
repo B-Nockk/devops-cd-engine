@@ -7,7 +7,7 @@ import (
 )
 
 type EnvironmentStore interface {
-	Get(
+	GetEnvironment(
 		ctx context.Context,
 		id domain.ID,
 	) (domain.Environment, error)
