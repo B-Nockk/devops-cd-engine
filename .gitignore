@@ -31,3 +31,7 @@ terraform.rc
 # Ansible
 *.retry
 infra/ansible/inventory.ini
+
+# Ignore real backend configs, but allow example templates
+*.hcl
+!*.example.hcl

@@ -1,3 +1,8 @@
+terraform {
+  backend "s3" {
+    # Bucket name, key, and region will be passed via -backend-config during terraform init
+  }
+}
 provider "aws" {
   region = var.region
 }

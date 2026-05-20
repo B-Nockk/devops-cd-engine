@@ -1,3 +1,8 @@
+terraform {
+  backend "gcs" {
+    # Bucket name and prefix will be passed via -backend-config during terraform init
+  }
+}
 provider "google" {
   project = var.project_id
   region  = var.region
