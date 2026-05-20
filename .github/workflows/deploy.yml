@@ -1,0 +1,31 @@
+name: Deploy Infrastructure
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: "Environment to deploy to"
+        required: true
+        default: "staging"
+        type: string
+
+jobs:
+  deploy-infrastructure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Terraform Provisioning
+        run: |
+          echo "Starting infrastructure provisioning for ${{ inputs.environment }}..."
+          echo "terraform init && terraform apply -auto-approve"
+
+      - name: Ansible Configuration
+        run: |
+          echo "Running configuration management..."
+          echo "ansible-playbook -i inventory playbook.yml"
+
+      - name: Trigger cd-engine Deployment
+        run: |
+          echo "Simulating cd-engine deployment..."
+          echo "POST /api/v1/deploy"
