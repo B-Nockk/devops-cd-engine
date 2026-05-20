@@ -1,0 +1,29 @@
+- name: Ensure deploy user exists
+  ansible.builtin.user:
+    name: deploy
+    shell: /bin/bash
+    groups: sudo
+    append: yes
+    state: present
+    create_home: yes
+
+- name: Allow deploy user passwordless sudo
+  ansible.builtin.copy:
+    dest: /etc/sudoers.d/deploy
+    content: "deploy ALL=(ALL) NOPASSWD:ALL\n"
+    owner: root
+    group: root
+    mode: "0440"
+
+- name: Disable root SSH login
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^PermitRootLogin"
+    line: "PermitRootLogin no"
+    state: present
+    backup: yes
+
+- name: Restart SSH service
+  ansible.builtin.systemd:
+    name: ssh
+    state: restarted

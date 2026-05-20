@@ -1,0 +1,7 @@
+- name: Configure cd-engine target nodes
+  hosts: webservers
+  become: true
+  roles:
+    - system
+    - docker
+    - caddy

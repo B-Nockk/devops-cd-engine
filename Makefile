@@ -22,10 +22,6 @@ lint:
 	# Requires golangci-lint installed locally
 	golangci-lint run ./...
 
-audit:
-	# Requires gosec installed locally
-	gosec -no-fail -fmt=golint ./...
-
 test-coverage:
 	go test -coverprofile=coverage.out ./...
 	go tool cover -html=coverage.outlint:
@@ -36,6 +32,6 @@ audit:
 	# Requires gosec installed locally
 	gosec -no-fail -fmt=golint ./...
 
-test-coverage:
-	go test -coverprofile=coverage.out ./...
-	go tool cover -html=coverage.out
+# test-coverage:
+# 	go test -coverprofile=coverage.out ./...
+# 	go tool cover -html=coverage.out

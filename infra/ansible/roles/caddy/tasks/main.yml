@@ -1,0 +1,27 @@
+- name: Install Caddy via apt
+  ansible.builtin.apt:
+    name: caddy
+    state: present
+    update_cache: yes
+
+- name: Ensure Caddy service is enabled and started
+  ansible.builtin.systemd:
+    name: caddy
+    enabled: true
+    state: started
+
+- name: Place default Caddyfile
+  ansible.builtin.copy:
+    dest: /etc/caddy/Caddyfile
+    content: |
+      :80 {
+          respond "Hello from cd-engine target node!"
+      }
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Reload Caddy service
+  ansible.builtin.systemd:
+    name: caddy
+    state: reloaded

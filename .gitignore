@@ -16,3 +16,18 @@ go.work.sum
 
 # OS files
 .DS_Store
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+*.tfvars.json
+override.tf
+override.tf.json
+.terraformrc
+terraform.rc
+
+# Ansible
+*.retry
+infra/ansible/inventory.ini
